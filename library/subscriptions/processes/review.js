@@ -1,75 +1,70 @@
-var Emitter = require('events').EventEmitter;
-var util = require('util');
+var async = require('async');
+var assert = require('assert');
 
 var ReviewProcess = function(args) {
-    var callback;
+
+    assert(args.application, "Need an application");
+
+    var app = args.application;
+
     //make sure the app is valid
-    this.ensureAppValid = function(app) {
+    this.ensureAppValid = function(next) {
         if (app.isValid()) {
-            this.emit("validated", app);
+            next(null, true);
         } else {
-            this.emit("invalid", app.validationMessage());
+            next(app.validationMessage(), null);
         }
     };
 
     // find the next mission
-    this.findNextMission = function(app) {
+    this.findNextMission = function(next) {
         //stub this out for now
-        app.mission = {
+        var mission = {
             commander: null,
             pilot: null,
             MAVPilot: null,
             passengers: []
         };
-        this.emit("mission-selected", app);
+        next(null, mission);
     };
 
     // make sure the role selected is available
-    this.roleIsAvailable = function(app) {
+    this.roleIsAvailable = function(next) {
         // we have no concept of role selection just yet
         // TO DO : What about a role ? Need more info
-        this.emit("role-available", app);
+        next(null, true);
     };
 
     // make rule height/weight/age is right for the role
-    this.ensureRoleCompatible = function(app) {
+    this.ensureRoleCompatible = function(next) {
         // TO DO : find out roles and weight/height
-        this.emit("role-compatible", app);
+        next(null, true);
     };
 
-    //accept the app with a message
-    this.acceptApplication = function(app) {
-        // What do we do ? 
-        callback(null, {
-            success: true,
-            message: 'Welcome to Mars Program!'
-        });
+    this.approveApplication = function(next) {
+        next(null, true);
     };
 
-    //deny the app with a message
-    this.denyApplication = function(message) {
-        // What do we do ? 
-        callback(null, {
-            success: false,
-            message: message
-        });
+    this.processApplication = function(next) {
+        async.series({
+                validated: this.ensureAppValid,
+                mission: this.findNextMission,
+                roleAvailable: this.roleIsAvailable,
+                roleCompatible: this.ensureRoleCompatible,
+                success: this.approveApplication
+            },
+            function(err, result) {
+                if (err) {
+                    next(null, {
+                        success: false,
+                        message: err
+                    });
+                } else {
+                    result.message = "Welcome to Mars!";
+                    next(null, result);
+                }
+            });
     };
-
-    this.processApplication = function(app, next) {
-        callback = next;
-        this.emit("application-recieved", app);
-    };
-
-    //event path
-    this.on("application-recieved", this.ensureAppValid);
-    this.on("validated", this.findNextMission);
-    this.on("mission-selected", this.roleIsAvailable);
-    this.on("role-available", this.ensureRoleCompatible);
-    this.on("role-compatible", this.acceptApplication);
-
-    //sad path
-    this.on("invalid", this.denyApplication);
 };
 
-util.inherits(ReviewProcess, Emitter);
 module.exports = ReviewProcess;
