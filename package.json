@@ -1,0 +1,27 @@
+{
+  "name": "rocket-shop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cserkaran/rocket-shop.git"
+  },
+  "author": "Karan Sharma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cserkaran/rocket-shop/issues"
+  },
+  "homepage": "https://github.com/cserkaran/rocket-shop#readme",
+  "dependencies": {
+    "coffee-script": "^1.12.7",
+    "mocha": "^3.4.2",
+    "moment": "^2.18.1"
+  },
+  "devDependencies": {
+    "sinon": "^2.4.1"
+  }
+}
